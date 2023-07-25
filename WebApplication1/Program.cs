@@ -3,14 +3,20 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using WebApplication1.Data;
+using WebApplication1.Interfaces;
 using WebApplication1.Middlewares;
+using WebApplication1.Repository;
+using WebApplication1.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<LoggingMiddleware>();
+
 
 builder.Services.AddDbContext<ChatContext>(opt =>
  opt.UseSqlServer(builder.Configuration.GetConnectionString("ChatContext")));
