@@ -60,8 +60,6 @@ namespace WebApplication1.Controllers
         [HttpPost("/api/register")]
         public async Task<ActionResult<User>> PostUser(User user)
         {
-            //var registration = _context.User.Any(u => u.Email == user.Email);
-
             var Registration = _userService.RegisterUser(user);
 
             if (Registration == Registration.EmailAlreadyExists)
