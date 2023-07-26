@@ -21,6 +21,9 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 
+builder.Services.AddScoped<ILogService, LogService>();
+builder.Services.AddScoped<ILogRepository, LogRepository>();
+
 
 builder.Services.AddScoped<LoggingMiddleware>();
 
