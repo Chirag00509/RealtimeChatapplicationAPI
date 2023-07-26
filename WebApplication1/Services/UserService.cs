@@ -1,8 +1,5 @@
 ﻿using WebApplication1.Interfaces;
 using WebApplication1.Modal;
-using WebApplication1.Repository;
-using Microsoft.Extensions.Configuration;
-using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using System.Security.Claims;
@@ -39,7 +36,7 @@ namespace WebApplication1.Services
                 return null;
             }
 
-            var token = getToken(user.Id, user.Email, convertHashPassword);
+            var token = getToken(user.Id, user.Name, user.Email);
 
             return new LoginResponse
             {
