@@ -7,6 +7,8 @@ namespace WebApplication1.Interfaces
         IEnumerable<UserProfile> GetUsersExcludingId(int id);
 
         Registration RegisterUser(User user);
+
+        LoginResponse LoginUser(Login login);
     }
 
     public enum Registration

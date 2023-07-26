@@ -1,23 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using WebApplication1.Data;
+﻿using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Modal;
-using System.Security.Cryptography;
 using System.Security.Claims;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.VisualBasic;
-using NuGet.ContentModel;
-using System.Diagnostics.Metrics;
-using System.Numerics;
-using WebApplication1.Services;
 using WebApplication1.Interfaces;
 
 namespace WebApplication1.Controllers
@@ -49,19 +33,12 @@ namespace WebApplication1.Controllers
 
             var users = _userService.GetUsersExcludingId(id).ToList();
 
-            if( users == null ) 
-            {  
-                return NotFound(new { message = "User or conversation not found" }); 
-            }
-
             return Ok(users);
         }
 
         [HttpPost("/api/register")]
         public async Task<ActionResult<User>> PostUser(User user)
         {
-            //var registration = _context.User.Any(u => u.Email == user.Email);
-
             var Registration = _userService.RegisterUser(user);
 
             if (Registration == Registration.EmailAlreadyExists)
@@ -84,61 +61,24 @@ namespace WebApplication1.Controllers
             return CreatedAtAction("GetUser", new { id = user.Id }, Profile);
         }
 
-        //[HttpPost("/api/login")]
+        [HttpPost("/api/login")]
 
-        //public async Task<ActionResult<Login>> login(Login login) 
-        //{
-        //    //var convertPassword = hashPassword(login.Password);
-        //    var users = await _context.User.FirstOrDefaultAsync(u=> u.Email == login.Email &&  u.Password == convertPassword ); 
+        public async Task<ActionResult<Login>> login(Login login)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { message = "Login failed due to validation errors." });
+            }
 
-        //    if (users == null)
-        //    {
-        //        return Unauthorized(new { message = "Login failed due to incorrect credentials" });
-        //    }
+            var users = _userService.LoginUser(login);
 
-        //    if(!ModelState.IsValid) 
-        //    {
-        //        return BadRequest(new { message = "Login failed due to validation errors." });
-        //    }
+            if (users == null)
+            {
+                return Unauthorized(new { message = "Login failed due to incorrect credentials" });
+            }
 
-        //    var token = getToken(users.Id, users.Name, users.Email);
-
-        //    var response = new LoginResponse
-        //    {
-        //        Token = token,
-
-        //        Profile = new UserProfile
-        //        {
-        //            Id = users.Id,
-        //            Name = users.Name,  
-        //            Email = users.Email,
-        //        }
-        //    };
-
-        //    return Ok(response);
-        //}
-        //private string getToken(int id, string name, string email )
-        //{
-        //    var claims = new[] {
-        //        new Claim(ClaimTypes.NameIdentifier, id.ToString()),
-        //        new Claim(ClaimTypes.Name, name),
-        //        new Claim(ClaimTypes.Email, email)
-        //    };
-
-        //    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-        //    var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        //    var token = new JwtSecurityToken(
-        //        _configuration["Jwt:Issuer"],
-        //        _configuration["Jwt:Audience"],
-        //        claims,
-        //        expires: DateTime.UtcNow.AddMinutes(10),
-        //        signingCredentials: signIn);
-
-
-        //    string Token = new JwtSecurityTokenHandler().WriteToken(token);
-
-        //    return Token;
-        //}
+            return Ok(users);
+        }
     }
 }
 

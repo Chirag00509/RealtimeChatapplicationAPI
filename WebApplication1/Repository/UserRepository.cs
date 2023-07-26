@@ -25,6 +25,11 @@ namespace WebApplication1.Repository
             return _context.User.Any(u => u.Email == email);
         }
 
+        public User getEmailAndPassword(string email, string password)
+        {
+            return _context.User.FirstOrDefault(u => u.Email == email && u.Password == password);
+        }
+
         public IEnumerable<UserProfile> GetUsersExcludingId(int id)
         {
             return _context.User
