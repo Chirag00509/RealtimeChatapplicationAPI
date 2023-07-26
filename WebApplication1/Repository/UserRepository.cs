@@ -1,4 +1,5 @@
-﻿using WebApplication1.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using WebApplication1.Data;
 using WebApplication1.Interfaces;
 using WebApplication1.Modal;
 
@@ -27,6 +28,11 @@ namespace WebApplication1.Repository
         public User getEmailAndPassword(string email, string password)
         {
             return _context.User.FirstOrDefault(u => u.Email == email && u.Password == password);
+        }
+
+        public async Task<User> GetUserByEmail(string email)
+        {
+            return await _context.User.FirstOrDefaultAsync(u => u.Email == email);
         }
 
         public IEnumerable<UserProfile> GetUsersExcludingId(int id)

@@ -1,4 +1,6 @@
-﻿using WebApplication1.Modal;
+﻿using Google.Apis.Auth;
+using Microsoft.AspNetCore.Mvc;
+using WebApplication1.Modal;
 
 namespace WebApplication1.Interfaces
 {
@@ -8,7 +10,10 @@ namespace WebApplication1.Interfaces
 
         Registration RegisterUser(User user);
 
-        LoginResponse LoginUser(Login login);
+        Task<ActionResult> LoginUser(Login login);
+
+        Task<LoginResponse> VerifyGoogleTokenAsync(string tokenId);
+
     }
 
     public enum Registration

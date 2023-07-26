@@ -8,5 +8,6 @@ namespace WebApplication1.Interfaces
         bool DoesEmailExist(string email);
         User getEmailAndPassword(string email, string password);
         void AddUser(User user);
+        Task<User> GetUserByEmail(string email);
     }
 }

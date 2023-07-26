@@ -41,6 +41,8 @@ namespace WebApplication1.Controllers
         {
             var Registration = _userService.RegisterUser(user);
 
+            Console.WriteLine(user.Email);
+
             if (Registration == Registration.EmailAlreadyExists)
             {
                 return Conflict(new { message = "Registration failed because the email is already registered." });
@@ -70,15 +72,17 @@ namespace WebApplication1.Controllers
                 return BadRequest(new { message = "Login failed due to validation errors." });
             }
 
-            var users = _userService.LoginUser(login);
-
-            if (users == null)
-            {
-                return Unauthorized(new { message = "Login failed due to incorrect credentials" });
-            }
-
-            return Ok(users);
+            return _userService.LoginUser(login);
         }
+
+        [HttpPost("/api/SocialLogin")]
+        public async Task<ActionResult> SocialLogin(TokenRequest token)
+        {
+            var user = await _userService.VerifyGoogleTokenAsync(token.TokenId);
+
+            return Ok(user);
+        }
+
     }
 }
 
