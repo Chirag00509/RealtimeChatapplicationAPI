@@ -39,28 +39,14 @@ namespace WebApplication1.Controllers
         [HttpPost("/api/register")]
         public async Task<ActionResult<User>> PostUser(User user)
         {
-            var Registration = _userService.RegisterUser(user);
-
-            Console.WriteLine(user.Email);
-
-            if (Registration == Registration.EmailAlreadyExists)
-            {
-                return Conflict(new { message = "Registration failed because the email is already registered." });
-            }
 
             if(!ModelState.IsValid)
             {
                 return BadRequest(new { message = "Registration failed due to validation errors." });
             }
 
-            var Profile = new UserProfile
-            {
-                Id = user.Id,
-                Name = user.Name,
-                Email = user.Email,
-            };
-
-            return CreatedAtAction("GetUser", new { id = user.Id }, Profile);
+            return await _userService.RegisterUser(user);
+            
         }
 
         [HttpPost("/api/login")]
@@ -72,7 +58,7 @@ namespace WebApplication1.Controllers
                 return BadRequest(new { message = "Login failed due to validation errors." });
             }
 
-            return _userService.LoginUser(login);
+            return await _userService.LoginUser(login);
         }
 
         [HttpPost("/api/SocialLogin")]

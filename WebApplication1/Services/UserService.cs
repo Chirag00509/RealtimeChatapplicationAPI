@@ -62,19 +62,26 @@ namespace WebApplication1.Services
             return new OkObjectResult(loginResponse);
         }
 
-        public Registration RegisterUser(User user)
+        public async Task<ActionResult> RegisterUser(User user)
         {
-            var emailExists = _userRepository.DoesEmailExist(user.Email);
+            var emailExists =  _userRepository.DoesEmailExist(user.Email);
 
             if (emailExists)
             {
-                return Registration.EmailAlreadyExists;
+                return new ConflictObjectResult(new { message = "Registration failed because the email is already registered." }) ;
             }
 
             user.Password = hashPassword(user.Password);
             user.Type = "normal";
             _userRepository.AddUser(user);
-            return Registration.Success;
+            var Profile = new UserProfile
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+            };
+
+            return new OkObjectResult(Profile);
         }
 
         public async Task<LoginResponse> VerifyGoogleTokenAsync(string tokenId)

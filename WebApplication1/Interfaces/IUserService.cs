@@ -8,17 +8,11 @@ namespace WebApplication1.Interfaces
     {
         IEnumerable<UserProfile> GetUsersExcludingId(int id);
 
-        Registration RegisterUser(User user);
+        Task<ActionResult> RegisterUser(User user);
 
         Task<ActionResult> LoginUser(Login login);
 
         Task<LoginResponse> VerifyGoogleTokenAsync(string tokenId);
 
-    }
-
-    public enum Registration
-    {
-        Success,
-        EmailAlreadyExists,
     }
 }
