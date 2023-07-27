@@ -32,7 +32,7 @@ namespace WebApplication1.Repository
             return await _context.Message.FirstOrDefaultAsync(u => u.Id == id);
         }
 
-        public async Task<List<Message>> GetMessages(int currentUserId, int receiverId)
+        public async Task<List<Message>> GetMessages(string currentUserId, string receiverId)
         {
             var messages = await _context.Message
                .Where(u => (u.SenderId == currentUserId && u.ReceiverId == receiverId) ||

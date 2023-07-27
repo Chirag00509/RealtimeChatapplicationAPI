@@ -4,10 +4,10 @@ namespace WebApplication1.Interfaces
 {
     public interface IUserRepository
     {
-        IEnumerable<UserProfile> GetUsersExcludingId(int id);
-        bool DoesEmailExist(string email);
-        User getEmailAndPassword(string email, string password);
-        void AddUser(User user);
-        Task<User> GetUserByEmail(string email);
+        IEnumerable<UserProfile> GetUsersExcludingId(string id);
+        //bool DoesEmailExist(string email);
+        //User getEmailAndPassword(string email, string password);
+        //void AddUser(User user);
+        //Task<User> GetUserByEmail(string email);
     }
 }

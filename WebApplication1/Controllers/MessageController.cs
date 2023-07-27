@@ -19,9 +19,9 @@ namespace WebApplication1.Controllers
         }
 
         //GET: api/Message
-       [HttpGet("{id}")]
+        [HttpGet("{id}")]
 
-        public async Task<IActionResult> GetMessage(int id)
+        public async Task<IActionResult> GetMessage(string id)
         {
 
             if (!ModelState.IsValid)
@@ -78,7 +78,7 @@ namespace WebApplication1.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMessage(int id)
         {
-           return await _messageService.DeleteMessage(id);
+            return await _messageService.DeleteMessage(id);
         }
     }
 }

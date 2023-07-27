@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using WebApplication1.Modal;
 
 namespace WebApplication1.Data
 {
-    public class ChatContext : DbContext
+    public class ChatContext : IdentityDbContext
     {
         public ChatContext(DbContextOptions<ChatContext> options) : base(options) 
         {
@@ -11,7 +12,8 @@ namespace WebApplication1.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>().ToTable("User");
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<Message>().ToTable("Message");
             modelBuilder.Entity<Logs>().ToTable("Logs");
 
@@ -28,7 +30,6 @@ namespace WebApplication1.Data
                 .OnDelete(DeleteBehavior.Restrict);
         }
 
-        public DbSet<User> User { get; set; }
         public DbSet<Message> Message { get; set; }
         public DbSet<Logs> Logs { get; set; }
     }

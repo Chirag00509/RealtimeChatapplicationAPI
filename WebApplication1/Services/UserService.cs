@@ -9,44 +9,52 @@ using Google.Apis.Auth;
 using System.Net.Mail;
 using Microsoft.AspNetCore.Mvc;
 using NuGet.Common;
+using Microsoft.AspNetCore.Identity;
+using Azure;
 
 namespace WebApplication1.Services
 {
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         IConfiguration _configuration;
-        public UserService(IUserRepository userRepository, IConfiguration configuration)
+        public UserService(IUserRepository userRepository, IConfiguration configuration, UserManager<IdentityUser> userManager, IHttpContextAccessor httpContextAccessor)
         {
             _userRepository = userRepository;
             _configuration = configuration;
+            _userManager = userManager;
+            _httpContextAccessor = httpContextAccessor;
         }
-        public IEnumerable<UserProfile> GetUsersExcludingId(int id)
+        public IEnumerable<UserProfile> GetUsersExcludingId()
         {
+            var id = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            Console.WriteLine(id);
             return _userRepository.GetUsersExcludingId(id);
         }
 
         public async Task<ActionResult> LoginUser(Login login)
         {
-            var checkGoogleUser = await _userRepository.GetUserByEmail(login.Email);
+            var user = await _userManager.FindByEmailAsync(login.Email);
 
-            if (checkGoogleUser.Type == "google") 
+            //if (checkGoogleUser.Type == "google")
+            //{
+            //    return new BadRequestObjectResult(new { message = "Please login with google" });
+            //}
+            var signInResult = await _userManager.CheckPasswordAsync(user, login.Password);
+
+            if (user == null)
             {
-                return new BadRequestObjectResult(new { message = "Please login with google" });
+                return new NotFoundObjectResult(new { message = "Login failed due to incorrect credentials" });
             }
-
-            var convertHashPassword = hashPassword(login.Password);
-
-            var user = _userRepository.getEmailAndPassword(login.Email, convertHashPassword);   
-
-            if(user == null) 
+            if(!signInResult)
             {
                 return new NotFoundObjectResult(new { message = "Login failed due to incorrect credentials" });
             }
 
-
-            var token = getToken(user.Id, user.Name, user.Email);
+            var token = getToken(user.Id, user.UserName, user.Email);
 
             var loginResponse = new LoginResponse
             {
@@ -54,34 +62,48 @@ namespace WebApplication1.Services
                 Profile = new UserProfile
                 {
                     Id = user.Id,
-                    Name = user.Name,
+                    Name = user.UserName,
                     Email = user.Email
                 }
             };
+
+            var id = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            Console.WriteLine($"{id}"); 
 
             return new OkObjectResult(loginResponse);
         }
 
         public async Task<ActionResult> RegisterUser(User user)
         {
-            var emailExists =  _userRepository.DoesEmailExist(user.Email);
+            var userExists = await _userManager.FindByNameAsync(user.Name);
 
-            if (emailExists)
+            if (userExists != null)
             {
-                return new ConflictObjectResult(new { message = "Registration failed because the email is already registered." }) ;
+                return new ConflictObjectResult(new { message = "Registration failed because the email is already registered." });
             }
 
-            user.Password = hashPassword(user.Password);
-            user.Type = "normal";
-            _userRepository.AddUser(user);
-            var Profile = new UserProfile
+            var users = new IdentityUser
             {
-                Id = user.Id,
-                Name = user.Name,
                 Email = user.Email,
+                UserName = user.Name
+            };
+
+            var result = await _userManager.CreateAsync(users, user.Password);
+
+            if (!result.Succeeded) 
+            {
+            }
+
+            var Profile = new UserProfile
+            {  
+                Id = users.Id,
+                Name = users.UserName,
+                Email = users.Email,
             };
 
             return new OkObjectResult(Profile);
+
         }
 
         public async Task<LoginResponse> VerifyGoogleTokenAsync(string tokenId)
@@ -95,23 +117,44 @@ namespace WebApplication1.Services
 
                 if (payload.EmailVerified)
                 {
-                    var emailCheck = _userRepository.DoesEmailExist(payload.Email);
+                    var user = await _userManager.FindByLoginAsync("Google", payload.Subject);
 
-                    if(!emailCheck)
+                    if (user == null)
                     {
-                        var newUser = new User
-                        {
-                            Name = payload.GivenName,
-                            Email = payload.Email,
-                            Type = "google"
-                        };
+                        user = await _userManager.FindByEmailAsync(payload.Email);
 
-                        _userRepository.AddUser(newUser);
+                        if (user == null)
+                        {
+                            user = new IdentityUser
+                            {
+                                UserName = payload.FamilyName,
+                                Email = payload.Email, 
+                            };
+
+                            Console.WriteLine(user);
+
+                            var userLoginInfo = new UserLoginInfo("Goggle", payload.Subject, "Goggle");
+                            var result = await _userManager.CreateAsync(user);
+
+                            if (result.Succeeded)
+                            {
+                                await _userManager.AddLoginAsync(user, userLoginInfo);
+                            }
+                            else
+                            {
+
+                            }
+                        }
                     }
 
-                    var users = await _userRepository.GetUserByEmail(payload.Email);
+                    var users = await _userManager.FindByEmailAsync(payload.Email);
 
-                    var generatedToken = getToken(users.Id, users.Name, users.Email);
+                    if(users == null)
+                    {
+                        return null;
+                    }
+
+                    var generatedToken = getToken(users.Id, users.UserName, users.Email);
 
                     var loginResponse = new LoginResponse
                     {
@@ -119,7 +162,7 @@ namespace WebApplication1.Services
                         Profile = new UserProfile
                         {
                             Id = users.Id,
-                            Name = users.Name,
+                            Name = users.UserName,
                             Email = users.Email
                         }
                     };
@@ -137,13 +180,13 @@ namespace WebApplication1.Services
             }
         }
 
-        private string getToken(int id, string name, string email)
+        private string getToken(string id, string name, string email)
         {
             var claims = new[] {
-                new Claim(ClaimTypes.NameIdentifier, id.ToString()),
-                new Claim(ClaimTypes.Name, name),
-                new Claim(ClaimTypes.Email, email)
-            };
+                        new Claim(ClaimTypes.NameIdentifier, id.ToString()),
+                        new Claim(ClaimTypes.Name, name),
+                        new Claim(ClaimTypes.Email, email)
+                    };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -158,17 +201,6 @@ namespace WebApplication1.Services
             string Token = new JwtSecurityTokenHandler().WriteToken(token);
 
             return Token;
-        }
-
-        private string hashPassword(string password)
-        {
-            using (var sha256 = SHA256.Create())
-            {
-                byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
-                byte[] hashBytes = sha256.ComputeHash(passwordBytes);
-                return Convert.ToBase64String(hashBytes);
-            }
-
         }
     }
 }
