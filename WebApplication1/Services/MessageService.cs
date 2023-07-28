@@ -27,7 +27,7 @@ namespace WebApplication1.Services
                 return new NotFoundObjectResult(new { message = "message not found" });
             }
 
-            if (Convert.ToInt32(userId) != messages.SenderId)
+            if (userId != messages.SenderId)
             {
                 return new UnauthorizedObjectResult(new { message = "Unauthorized access" });
             }
@@ -37,10 +37,10 @@ namespace WebApplication1.Services
             return new OkObjectResult(new { message = "Message deleted successfully" });
         }
 
-        public async Task<List<Message>> GetMessages(int receiverId)
+        public async Task<List<Message>> GetMessages(string receiverId)
         {
             var currentUser = _httpContextAccessor.HttpContext.User;
-            var userId = Convert.ToInt32(currentUser.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var userId = currentUser.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             var message = await _messageRepository.GetMessages(userId, receiverId);
 
@@ -57,12 +57,12 @@ namespace WebApplication1.Services
             var currentUser = _httpContextAccessor.HttpContext.User;
             var userId = currentUser.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if(userId == null) 
+            if (userId == null)
             {
                 return null;
             }
 
-            message.SenderId = Convert.ToInt32(userId);
+            message.SenderId = userId;
             message.Timestemp = DateTime.Now;
 
             var addMessage = await _messageRepository.AddMessage(message);
@@ -85,12 +85,12 @@ namespace WebApplication1.Services
 
             var messages = await _messageRepository.GetMessageById(id);
 
-            if(messages == null)
+            if (messages == null)
             {
                 return new NotFoundObjectResult(new { message = "message not found" });
             }
 
-            if (Convert.ToInt32(userId) != messages.SenderId)
+            if (userId != messages.SenderId)
             {
                 return new UnauthorizedObjectResult(new { message = "Unauthorized access" });
             }

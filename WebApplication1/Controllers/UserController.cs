@@ -3,6 +3,7 @@ using WebApplication1.Modal;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using WebApplication1.Interfaces;
+using Microsoft.AspNetCore.Identity;
 
 namespace WebApplication1.Controllers
 {
@@ -17,37 +18,44 @@ namespace WebApplication1.Controllers
             _userService = userService;
         }
 
-        // GET: api/User
-        [HttpGet]
-        [Authorize]
-        public async Task<ActionResult<IEnumerable<User>>> GetUser()
-        {
-            var currentUser = HttpContext.User;
-
-            if (!ModelState.IsValid) 
-            {
-                return BadRequest(new { message = "Invalid request parameters" });
-            }
-
-            var id = Convert.ToInt32(currentUser.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-
-            var users = _userService.GetUsersExcludingId(id).ToList();
-
-            return Ok(users);
-        }
-
         [HttpPost("/api/register")]
-        public async Task<ActionResult<User>> PostUser(User user)
+        public async Task<ActionResult<IdentityResult>> PostUser(User user)
         {
 
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(new { message = "Registration failed due to validation errors." });
             }
 
             return await _userService.RegisterUser(user);
-            
+
+
         }
+
+        // GET: api/User
+        [HttpGet]
+        [Authorize]
+        public async Task<ActionResult> GetUser()
+        {
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { message = "Invalid request parameters" });
+            }
+            Console.WriteLine("Hello");
+           
+            var users = _userService.GetUsersExcludingId().ToList();
+
+            Console.WriteLine(users);
+
+            if(users == null)
+            {
+                return NotFound(new { messsage = "Message not found" });
+            }
+
+            return Ok(users);
+        }
+
 
         [HttpPost("/api/login")]
 
