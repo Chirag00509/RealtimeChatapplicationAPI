@@ -38,7 +38,15 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
             .AddEntityFrameworkStores<ChatContext>()
             .AddDefaultTokenProviders();
 
-builder.Services.AddCors(options => { options.AddDefaultPolicy(builder => { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); }); });
+//builder.Services.AddCors(options => { options.AddDefaultPolicy(builder => { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); }); });
+
+builder.Services.AddCors(options => options.AddPolicy("CorsPolicy",
+builder =>
+{
+    builder.AllowAnyMethod().AllowAnyHeader()
+    .WithOrigins("http://localhost:4200")
+    .AllowCredentials();
+}));
 
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -96,14 +104,10 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<LoggingMiddleware>();
-app.UseCors();
+app.UseCors("CorsPolicy");
 app.MapControllers();
-
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-    endpoints.MapHub<MessageHub>("/chat");
-});
+    
+app.MapHub<ChatHub>("/chat");
 
 app.Run();
 
