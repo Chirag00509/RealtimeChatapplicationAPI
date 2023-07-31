@@ -32,6 +32,12 @@ namespace WebApplication1.Repository
             return await _context.Message.FirstOrDefaultAsync(u => u.Id == id);
         }
 
+        public async Task<List<Message>> GetMessageHistory(string result)
+        {
+            return await _context.Message.Where(u => u.content.Contains(result)).ToListAsync();
+
+        }
+
         public async Task<List<Message>> GetMessages(string currentUserId, string receiverId)
         {
             var messages = await _context.Message

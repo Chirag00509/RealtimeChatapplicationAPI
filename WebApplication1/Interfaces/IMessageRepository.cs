@@ -10,5 +10,8 @@ namespace WebApplication1.Interfaces
         Task<Message> GetMessageById(int id);
         Task UpdateMessage(Message message);
         Task DeleteMessage(Message message);
+
+        Task<List<Message>> GetMessageHistory(string result);
+
     }
 }

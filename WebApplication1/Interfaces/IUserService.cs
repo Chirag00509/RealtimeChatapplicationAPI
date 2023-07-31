@@ -13,6 +13,8 @@ namespace WebApplication1.Interfaces
         Task<ActionResult> LoginUser(Login login);
 
         Task<LoginResponse> VerifyGoogleTokenAsync(string tokenId);
+        Task<List<string>> GetUserName(string id);
+
 
     }
 }

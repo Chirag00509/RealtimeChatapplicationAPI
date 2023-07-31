@@ -80,5 +80,26 @@ namespace WebApplication1.Controllers
         {
             return await _messageService.DeleteMessage(id);
         }
+
+        [HttpGet("/api/conversation/search/{result}")] 
+
+        public async Task<IActionResult> SearchResult(string result)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { message = "message sending failed due to validation errors." });
+            }
+
+            var message = await _messageService.GetMessageHistory(result);
+
+            return Ok(message.Select(u => new
+            {
+                id = u.Id,
+                senderId = u.SenderId,
+                receiverId = u.ReceiverId,
+                content = u.content,
+                timestamp = u.Timestemp
+            }));
+        }
     }
 }

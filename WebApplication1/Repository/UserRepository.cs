@@ -51,5 +51,10 @@ namespace WebApplication1.Repository
                 })
                 .ToList();
         }
+
+        public async Task<List<string>> GetUserNameId(string id)
+        {
+            return await _userManager.Users.Where(u => u.Id == id).Select(u => u.UserName).ToListAsync();
+        }
     }
 }

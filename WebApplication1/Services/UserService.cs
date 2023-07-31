@@ -28,6 +28,12 @@ namespace WebApplication1.Services
             _userManager = userManager;
             _httpContextAccessor = httpContextAccessor;
         }
+
+        public async Task<List<string>> GetUserName(string id)
+        {
+            return await _userRepository.GetUserNameId(id);
+        }
+
         public IEnumerable<UserProfile> GetUsersExcludingId()
         {
             var id = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

@@ -10,5 +10,7 @@ namespace WebApplication1.Interfaces
         Task<IActionResult> PutMessage(int id, ContentRequest ContentRequest);
         Task<IActionResult> DeleteMessage(int id);
 
+        Task<List<Message>> GetMessageHistory(string result);
+
     }
 }

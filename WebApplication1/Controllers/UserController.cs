@@ -77,6 +77,14 @@ namespace WebApplication1.Controllers
             return Ok(user);
         }
 
+        [HttpGet("/api/User/{id}")]
+
+        public async Task<ActionResult> GetUserNameById(string id)
+        {
+            var user = await _userService.GetUserName(id);
+
+            return Ok(user);
+        }
     }
 }
 
