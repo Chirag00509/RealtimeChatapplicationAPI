@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using WebApplication1.Data;
+using WebApplication1.Hubs;
 using WebApplication1.Interfaces;
 using WebApplication1.Middlewares;
 using WebApplication1.Repository;
@@ -16,6 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddSignalR();
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -36,7 +38,15 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
             .AddEntityFrameworkStores<ChatContext>()
             .AddDefaultTokenProviders();
 
-builder.Services.AddCors(options => { options.AddDefaultPolicy(builder => { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); }); });
+//builder.Services.AddCors(options => { options.AddDefaultPolicy(builder => { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); }); });
+
+builder.Services.AddCors(options => options.AddPolicy("CorsPolicy",
+builder =>
+{
+    builder.AllowAnyMethod().AllowAnyHeader()
+    .WithOrigins("http://localhost:4200")
+    .AllowCredentials();
+}));
 
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -91,11 +101,18 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
+app.UseRouting();
 app.UseAuthorization();
 app.UseMiddleware<LoggingMiddleware>();
-app.UseCors();
+app.UseCors("CorsPolicy");
 app.MapControllers();
 
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapHub<ChatHub>("/chat");
+});
+
 app.Run();
+
+

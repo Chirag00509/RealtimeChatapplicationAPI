@@ -2,6 +2,8 @@
 using WebApplication1.Interfaces;
 using WebApplication1.Modal;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using WebApplication1.Hubs;
 
 namespace WebApplication1.Services
 {
@@ -9,11 +11,13 @@ namespace WebApplication1.Services
     {
         private readonly IMessageRepository _messageRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IHubContext<ChatHub> _hubContext;
 
-        public MessageService(IMessageRepository messageRepository, IHttpContextAccessor httpContextAccessor)
+        public MessageService(IMessageRepository messageRepository, IHttpContextAccessor httpContextAccessor, IHubContext<ChatHub> hubContext)
         {
             _messageRepository = messageRepository;
             _httpContextAccessor = httpContextAccessor;
+            _hubContext = hubContext;
         }
 
         public async Task<IActionResult> DeleteMessage(int id)
@@ -75,6 +79,9 @@ namespace WebApplication1.Services
             message.Timestemp = DateTime.Now;
 
             var addMessage = await _messageRepository.AddMessage(message);
+
+
+            await _hubContext.Clients.All.SendAsync("ReceiveOne", userId, message);
 
             var messageResponse = new MessageResponse
             {

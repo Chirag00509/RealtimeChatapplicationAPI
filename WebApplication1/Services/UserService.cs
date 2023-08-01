@@ -137,7 +137,6 @@ namespace WebApplication1.Services
                                 Email = payload.Email, 
                             };
 
-                            Console.WriteLine(user);
 
                             var userLoginInfo = new UserLoginInfo("Goggle", payload.Subject, "Goggle");
                             var result = await _userManager.CreateAsync(user);
