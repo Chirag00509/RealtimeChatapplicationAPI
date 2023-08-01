@@ -48,14 +48,14 @@ namespace WebApplication1.Controllers
 
         // PUT: api/Message/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMessage(int id, ContentRequest contentRequest)
+        public async Task<IActionResult> PutMessage(int id, Message message)
         {
             if (!ModelState.IsValid)
             {
                 return new BadRequestObjectResult(new { message = "message editing failed due to validation errors." });
             }
 
-            return await _messageService.PutMessage(id, contentRequest);
+            return await _messageService.PutMessage(id, message);
 
         }
 

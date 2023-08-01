@@ -7,7 +7,7 @@ namespace WebApplication1.Interfaces
     {
         Task<MessageResponse> PostMessage(Message message);
         Task<List<Message>> GetMessages(string receiverId);
-        Task<IActionResult> PutMessage(int id, ContentRequest ContentRequest);
+        Task<IActionResult> PutMessage(int id, Message message);
         Task<IActionResult> DeleteMessage(int id);
 
         Task<List<Message>> GetMessageHistory(string result);

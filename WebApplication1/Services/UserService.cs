@@ -29,9 +29,16 @@ namespace WebApplication1.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<List<string>> GetUserName(string id)
+        public async Task<SendName> GetUserNameById(string userId)
         {
-            return await _userRepository.GetUserNameId(id);
+            var user = await _userManager.FindByIdAsync(userId);
+
+            var name = new SendName
+            {
+                Name = user.UserName
+            };
+
+            return name;
         }
 
         public IEnumerable<UserProfile> GetUsersExcludingId()

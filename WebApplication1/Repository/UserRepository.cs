@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Data;
 using WebApplication1.Interfaces;
@@ -18,27 +19,6 @@ namespace WebApplication1.Repository
             _userManager = userManager;
         }
 
-        //        public void AddUser(User user)
-        //        {
-        //            _context.User.Add(user);
-        //            _context.SaveChanges();
-        //        }
-
-        //public bool DoesEmailExist(string email)
-        //{
-        //    return _context.User.Any(u => u.Email == email);
-        //}
-
-        //        public User getEmailAndPassword(string email, string password)
-        //        {
-        //            return _context.User.FirstOrDefault(u => u.Email == email && u.Password == password);
-        //        }
-
-        //        public async Task<User> GetUserByEmail(string email)
-        //        {
-        //            return await _context.User.FirstOrDefaultAsync(u => u.Email == email);
-        //        }
-
         public IEnumerable<UserProfile> GetUsersExcludingId(string id)
         {
             return _userManager.Users
@@ -50,11 +30,6 @@ namespace WebApplication1.Repository
                     Email = u.Email
                 })
                 .ToList();
-        }
-
-        public async Task<List<string>> GetUserNameId(string id)
-        {
-            return await _userManager.Users.Where(u => u.Id == id).Select(u => u.UserName).ToListAsync();
         }
     }
 }

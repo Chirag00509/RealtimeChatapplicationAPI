@@ -81,7 +81,7 @@ namespace WebApplication1.Services
             var addMessage = await _messageRepository.AddMessage(message);
 
 
-            await _hubContext.Clients.All.SendAsync("ReceiveOne", userId, message);
+            await _hubContext.Clients.All.SendAsync("ReceiveOne", message);
 
             var messageResponse = new MessageResponse
             {
@@ -95,7 +95,7 @@ namespace WebApplication1.Services
             return messageResponse;
         }
 
-        public async Task<IActionResult> PutMessage(int id, ContentRequest ContentRequest)
+        public async Task<IActionResult> PutMessage(int id, Message message)
         {
             var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -111,8 +111,11 @@ namespace WebApplication1.Services
                 return new UnauthorizedObjectResult(new { message = "Unauthorized access" });
             }
 
-            messages.content = ContentRequest.Content;
+            messages.content = message.content;
             await _messageRepository.UpdateMessage(messages);
+
+            await _hubContext.Clients.All.SendAsync("ReceiveEdited", message);
+
 
             return new OkObjectResult(new { message = "Message edited successfully" });
         }

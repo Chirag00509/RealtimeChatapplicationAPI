@@ -79,11 +79,16 @@ namespace WebApplication1.Controllers
 
         [HttpGet("/api/User/{id}")]
 
-        public async Task<ActionResult> GetUserNameById(string id)
+        public async Task<ActionResult<SendName>> GetUserNameById(string id)
         {
-            var user = await _userService.GetUserName(id);
+            var userName = await _userService.GetUserNameById(id);
+            if (userName == null)
+            {
+                return NotFound();
+            }
 
-            return Ok(user);
+            return userName;
+
         }
     }
 }
