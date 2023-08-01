@@ -102,12 +102,16 @@ using (var scope = app.Services.CreateScope())
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
+app.UseRouting();
 app.UseAuthorization();
 app.UseMiddleware<LoggingMiddleware>();
 app.UseCors("CorsPolicy");
 app.MapControllers();
-    
-app.MapHub<ChatHub>("/chat");
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapHub<ChatHub>("/chat");
+});
 
 app.Run();
 

@@ -1,18 +1,16 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.DotNet.Scaffolding.Shared.Messaging;
+using System.Diagnostics;
 
 namespace WebApplication1.Hubs
 {
-    public class ChatHub : Hub
-    {
-        public Task SendMessage1(string user, string message)
+        public class ChatHub : Hub
         {
-            string connectionId = Context.ConnectionId;
-            Console.WriteLine(connectionId);
-            return Clients.All.SendAsync("ReceiveOne", user, message);
-
-
+            public Task SendMessage(string user, Message message)
+            {
+                Console.WriteLine("Workinggg");
+                return Clients.All.SendAsync("ReceiveOne", user, message);
+            }
         }
-    }
 }
 

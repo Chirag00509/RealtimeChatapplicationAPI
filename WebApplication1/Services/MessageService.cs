@@ -71,8 +71,8 @@ namespace WebApplication1.Services
 
             var addMessage = await _messageRepository.AddMessage(message);
 
-            await _hubContext.Clients.All.SendAsync("ReceiveOne", userId, message.content);
 
+            await _hubContext.Clients.All.SendAsync("ReceiveOne", userId, message);
 
             var messageResponse = new MessageResponse
             {
