@@ -12,12 +12,14 @@ namespace WebApplication1.Services
         private readonly IMessageRepository _messageRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IHubContext<ChatHub> _hubContext;
+        private readonly IUserConnectionService _userConnectionService;
 
-        public MessageService(IMessageRepository messageRepository, IHttpContextAccessor httpContextAccessor, IHubContext<ChatHub> hubContext)
+        public MessageService(IMessageRepository messageRepository, IHttpContextAccessor httpContextAccessor, IHubContext<ChatHub> hubContext, IUserConnectionService userConnectionService)
         {
             _messageRepository = messageRepository;
             _httpContextAccessor = httpContextAccessor;
             _hubContext = hubContext;
+            _userConnectionService = userConnectionService;
         }
 
         public async Task<IActionResult> DeleteMessage(int id)
@@ -37,6 +39,8 @@ namespace WebApplication1.Services
             }
 
             await _messageRepository.DeleteMessage(messages);
+
+            await _hubContext.Clients.All.SendAsync("ReceiveDeleted", messages);
 
             return new OkObjectResult(new { message = "Message deleted successfully" });
         }
@@ -80,8 +84,11 @@ namespace WebApplication1.Services
 
             var addMessage = await _messageRepository.AddMessage(message);
 
+            var receiverConnectionId = await _userConnectionService.GetConnectionIdAsync(userId);
 
-            await _hubContext.Clients.All.SendAsync("ReceiveOne", message);
+            Console.WriteLine(receiverConnectionId);
+
+            await _hubContext.Clients.Client(receiverConnectionId).SendAsync("ReceiveOne", message);
 
             var messageResponse = new MessageResponse
             {
@@ -114,7 +121,7 @@ namespace WebApplication1.Services
             messages.content = message.content;
             await _messageRepository.UpdateMessage(messages);
 
-            await _hubContext.Clients.All.SendAsync("ReceiveEdited", message);
+            await _hubContext.Clients.All.SendAsync("ReceiveEdited", messages);
 
 
             return new OkObjectResult(new { message = "Message edited successfully" });

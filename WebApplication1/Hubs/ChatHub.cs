@@ -1,14 +1,59 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.DotNet.Scaffolding.Shared.Messaging;
+using NuGet.Common;
 using System.Diagnostics;
+using System.Security.Claims;
+using WebApplication1.Interfaces;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.IdentityModel.Tokens.Jwt;
+
 
 namespace WebApplication1.Hubs
 {
-        public class ChatHub : Hub
+    public class ChatHub : Hub
+    {
+        private readonly IUserConnectionService _userConnectionService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+
+        public ChatHub(IUserConnectionService userConnectionService, IHttpContextAccessor httpContextAccessor)
         {
-            public Task SendMessage(Message message)
+            _userConnectionService = userConnectionService;
+            _httpContextAccessor = httpContextAccessor;
+        }
+        public override async Task OnConnectedAsync()
+        {
+            var checkToken = Context.User.Identity.IsAuthenticated;
+
+            var token = Context.GetHttpContext().Request.Query["token"].ToString();
+
+            var jwtToken = new JwtSecurityToken(token);
+
+            var userIdClaim = jwtToken.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier);
+
+            var userId = userIdClaim.Value;
+
+            var connectionId = Context.ConnectionId;
+
+            await _userConnectionService.AddConnectionAsync(userId, connectionId);
+
+            await base.OnConnectedAsync();
+        }
+
+        public override async Task OnDisconnectedAsync(Exception exception)
+        {
+            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var connectionId = Context.ConnectionId;
+
+            await _userConnectionService.RemoveConnectionAsync(userId, connectionId);
+
+            await base.OnDisconnectedAsync(exception);
+        }
+        public Task SendMessage(Message message)
             {
-                return Clients.All.SendAsync("ReceiveOne", message);
+                return Clients.Client(Context.ConnectionId).SendAsync("ReceiveOne", message);
             }
 
             public Task SendEditedMessage(Message message) 
@@ -16,6 +61,11 @@ namespace WebApplication1.Hubs
                 return Clients.All.SendAsync("ReceiveEdited", message);
             }
 
-        }
+            public Task SendDeletedMessage(Message message) 
+            {
+                return Clients.All.SendAsync("ReceiveDeleted", message);
+            }
+
+    }
 }
 
