@@ -5,28 +5,30 @@ namespace WebApplication1.Services
 {
     public class UserConnectionService : IUserConnectionService
     {
-        private readonly ConcurrentDictionary<string, List<string>> _userConnections = new ConcurrentDictionary<string, List<string>>();
+
+        private static ConcurrentDictionary<string, string> _userConnections = new ConcurrentDictionary<string, string>();
 
         public Task AddConnectionAsync(string userId, string connectionId)
         {
-            var connections = _userConnections.GetOrAdd(userId, _ => new List<string>());
-            connections.Add(connectionId);
+             _userConnections.AddOrUpdate(userId, connectionId, (_, existingConnectionId) => connectionId);
+
+            Console.WriteLine("working");
 
             return Task.CompletedTask;
         }
 
-        public Task<string> GetConnectionIdAsync(string userId)
+        public void RemoveConnectionAsync(string userId, string connectionId)
         {
-            if (_userConnections.TryGetValue(userId, out var connections))
-            {
-                return Task.FromResult(connections.FirstOrDefault());
-            }
-            return Task.FromResult<string>(null);
+            _userConnections.TryRemove(userId, out _);
         }
 
-        public Task RemoveConnectionAsync(string userId, string connectionId)
+        public string GetConnectionIdAsync(string userId)
         {
-            throw new NotImplementedException();
+            if (_userConnections.TryGetValue(userId, out var connectionId))
+            {
+                return connectionId;
+            }
+            return null;
         }
     }
 }

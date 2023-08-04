@@ -25,19 +25,11 @@ namespace WebApplication1.Hubs
         }
         public override async Task OnConnectedAsync()
         {
-            var checkToken = Context.User.Identity.IsAuthenticated;
-
-            var token = Context.GetHttpContext().Request.Query["token"].ToString();
-
-            var jwtToken = new JwtSecurityToken(token);
-
-            var userIdClaim = jwtToken.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier);
-
-            var userId = userIdClaim.Value;
-
             var connectionId = Context.ConnectionId;
 
-            await _userConnectionService.AddConnectionAsync(userId, connectionId);
+            var userId = getUserId();
+
+           _userConnectionService.AddConnectionAsync(userId, connectionId);
 
             await base.OnConnectedAsync();
         }
@@ -47,24 +39,45 @@ namespace WebApplication1.Hubs
             var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var connectionId = Context.ConnectionId;
 
-            await _userConnectionService.RemoveConnectionAsync(userId, connectionId);
+             _userConnectionService.RemoveConnectionAsync(userId, connectionId);
 
             await base.OnDisconnectedAsync(exception);
         }
         public Task SendMessage(Message message)
+        {
+            var userId = getUserId();
+            var ConnectionId = _userConnectionService.GetConnectionIdAsync(userId);
+
+            if(ConnectionId == null) 
             {
-                return Clients.Client(Context.ConnectionId).SendAsync("ReceiveOne", message);
+                return null;
             }
 
-            public Task SendEditedMessage(Message message) 
-            {
-                return Clients.All.SendAsync("ReceiveEdited", message);
-            }
+            return Clients.Client(ConnectionId).SendAsync("ReceiveOne", message);
+        }
 
-            public Task SendDeletedMessage(Message message) 
-            {
-                return Clients.All.SendAsync("ReceiveDeleted", message);
-            }
+        public Task SendEditedMessage(Message message) 
+        {
+            return Clients.All.SendAsync("ReceiveEdited", message);
+        }
+
+        public Task SendDeletedMessage(Message message) 
+        {
+            return Clients.All.SendAsync("ReceiveDeleted", message);
+        }
+
+        public string getUserId()
+        {
+            var token = Context.GetHttpContext().Request.Query["token"].ToString();
+
+            var jwtToken = new JwtSecurityToken(token);
+
+            var userIdClaim = jwtToken.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier);
+
+            var id = userIdClaim.Value;
+
+            return id;
+        }
 
     }
 }

@@ -84,9 +84,19 @@ namespace WebApplication1.Services
 
             var addMessage = await _messageRepository.AddMessage(message);
 
-            var receiverConnectionId = await _userConnectionService.GetConnectionIdAsync(userId);
 
-            Console.WriteLine(receiverConnectionId);
+            var senderConnectionId = _userConnectionService.GetConnectionIdAsync(userId);
+            var receiverConnectionId = _userConnectionService.GetConnectionIdAsync(message.ReceiverId);
+
+            if (senderConnectionId != null)
+            {
+                await _hubContext.Clients.Client(senderConnectionId).SendAsync("ReceiveOne", message);
+            }
+
+            if (receiverConnectionId != null)
+            {
+                await _hubContext.Clients.Client(receiverConnectionId).SendAsync("ReceiveOne", message);
+            }
 
             await _hubContext.Clients.Client(receiverConnectionId).SendAsync("ReceiveOne", message);
 
