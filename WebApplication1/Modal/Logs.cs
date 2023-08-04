@@ -9,6 +9,6 @@
 
         public string RequestBody { get; set; }
 
-        public string TimeStamp { get; set; }
+        public DateTime TimeStamp { get; set; }
     }
 }

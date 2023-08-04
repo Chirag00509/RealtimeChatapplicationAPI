@@ -4,7 +4,7 @@ namespace WebApplication1.Interfaces
 {
     public interface ILogRepository
     {
-        Task<IEnumerable<object>> GetLogs();
+        Task<IEnumerable<object>> GetLogs(DateTime? customStartTime, DateTime? customEndTime);
 
     }
 }

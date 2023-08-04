@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using WebApplication1.Data;
 using WebApplication1.Interfaces;
 using WebApplication1.Modal;
@@ -12,16 +13,29 @@ namespace WebApplication1.Repository
         {
             _context = context;
         }
-        public async Task<IEnumerable<object>> GetLogs()
+        public async Task<IEnumerable<object>> GetLogs(DateTime? customStartTime, DateTime? customEndTime)
         {
-            return await _context.Logs.Select(u => new
+            IEnumerable<Logs> loggs;
+
+            if (customStartTime != null && customEndTime != null)
+            {
+                loggs = _context.Logs
+                 .Where(log => log.TimeStamp >= customStartTime && log.TimeStamp <= customEndTime);
+            }
+            else
+            {
+                 loggs = await _context.Logs.ToListAsync();
+            }
+
+            return loggs
+                .Select(u => new
             {
                 Id = u.id,
                 Ip = u.Ip,
                 Username = u.Username,
                 RequestBody = u.RequestBody.Replace("\n", "").Replace("\"", "").Replace("\r", ""),
                 TimeStamp = u.TimeStamp,
-            }).ToListAsync();
+            });
         }
     }
 }

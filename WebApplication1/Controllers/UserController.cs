@@ -46,8 +46,6 @@ namespace WebApplication1.Controllers
            
             var users = _userService.GetUsersExcludingId().ToList();
 
-            Console.WriteLine(users);
-
             if(users == null)
             {
                 return NotFound(new { messsage = "Message not found" });

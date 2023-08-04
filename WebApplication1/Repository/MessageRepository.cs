@@ -38,11 +38,12 @@ namespace WebApplication1.Repository
 
         }
 
-        public async Task<List<Message>> GetMessages(string currentUserId, string receiverId)
+        public async Task<List<Message>> GetMessages(string currentUserId, string receiverId, int count)
         {
             var messages = await _context.Message
                .Where(u => (u.SenderId == currentUserId && u.ReceiverId == receiverId) ||
                            (u.SenderId == receiverId && u.ReceiverId == currentUserId))
+               .Take(count)
                .ToListAsync();
 
             return messages;

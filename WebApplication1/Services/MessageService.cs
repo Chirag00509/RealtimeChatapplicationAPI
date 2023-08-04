@@ -54,12 +54,12 @@ namespace WebApplication1.Services
 
         }
 
-        public async Task<List<Message>> GetMessages(string receiverId)
+        public async Task<List<Message>> GetMessages(string receiverId, int count)
         {
             var currentUser = _httpContextAccessor.HttpContext.User;
             var userId = currentUser.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            var message = await _messageRepository.GetMessages(userId, receiverId);
+            var message = await _messageRepository.GetMessages(userId, receiverId, count);
 
             if (message == null)
             {

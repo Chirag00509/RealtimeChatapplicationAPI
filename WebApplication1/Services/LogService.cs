@@ -12,9 +12,9 @@ namespace WebApplication1.Services
         {
             _logRepository = logRepository;
         }
-        public async Task<ActionResult<IEnumerable<Logs>>> GetLogs()
+        public async Task<ActionResult<IEnumerable<Logs>>> GetLogs(DateTime? startTime, DateTime? endTime)
         {
-            var loggs = await _logRepository.GetLogs(); 
+            var loggs = await _logRepository.GetLogs(startTime, endTime); 
                 
             if (loggs == null)
             {

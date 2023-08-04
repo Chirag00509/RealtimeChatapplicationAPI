@@ -18,16 +18,16 @@ namespace WebApplication1.Controllers
 
         // GET: api/Log
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Logs>>> GetLogs()
+        public async Task<ActionResult<IEnumerable<Logs>>> GetLogs(DateTime? startTime, DateTime? endTime)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(new { message = "Invalid request parameters" });
             }
 
-            return await _logService.GetLogs();
+            var loggs = await _logService.GetLogs(startTime.Value, endTime.Value);
 
-
+            return Ok(loggs);   
         }
     }
 }

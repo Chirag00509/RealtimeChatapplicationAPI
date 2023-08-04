@@ -38,7 +38,7 @@ namespace WebApplication1.Middlewares
             {
                 Ip = ip,
                 RequestBody = RequestBody,
-                TimeStamp = TimeStamp,
+                TimeStamp = Convert.ToDateTime(TimeStamp),
                 Username = UserName,    
             });
 

@@ -5,6 +5,6 @@ namespace WebApplication1.Interfaces
 {
     public interface ILogService
     {
-        Task<ActionResult<IEnumerable<Logs>>> GetLogs();
+        Task<ActionResult<IEnumerable<Logs>>> GetLogs(DateTime? startTime, DateTime? endTime);
     }
 }
