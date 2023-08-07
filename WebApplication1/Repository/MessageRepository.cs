@@ -43,8 +43,8 @@ namespace WebApplication1.Repository
             var messages = await _context.Message
                .Where(u => (u.SenderId == currentUserId && u.ReceiverId == receiverId) ||
                            (u.SenderId == receiverId && u.ReceiverId == currentUserId)
-                &&
-               (u.Timestemp <= before))
+               &&
+               (u.Timestemp >= before))
                .OrderBy(u => u.Timestemp)
                .Take(count)
                .ToListAsync();
