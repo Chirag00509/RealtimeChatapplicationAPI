@@ -25,9 +25,8 @@ namespace WebApplication1.Controllers
                 return BadRequest(new { message = "Invalid request parameters" });
             }
 
-            var loggs = await _logService.GetLogs(startTime.Value, endTime.Value);
+            return await _logService.GetLogs(startTime, endTime);
 
-            return Ok(loggs);   
         }
     }
 }

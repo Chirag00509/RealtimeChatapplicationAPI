@@ -44,7 +44,6 @@ namespace WebApplication1.Services
         public IEnumerable<UserProfile> GetUsersExcludingId()
         {
             var id = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            Console.WriteLine(id);
             return _userRepository.GetUsersExcludingId(id);
         }
 
@@ -52,10 +51,6 @@ namespace WebApplication1.Services
         {
             var user = await _userManager.FindByEmailAsync(login.Email);
 
-            //if (checkGoogleUser.Type == "google")
-            //{
-            //    return new BadRequestObjectResult(new { message = "Please login with google" });
-            //}
             var signInResult = await _userManager.CheckPasswordAsync(user, login.Password);
 
             if (user == null)
@@ -106,6 +101,7 @@ namespace WebApplication1.Services
 
             if (!result.Succeeded) 
             {
+                return new BadRequestObjectResult(new { message = "Registration failed" });
             }
 
             var Profile = new UserProfile

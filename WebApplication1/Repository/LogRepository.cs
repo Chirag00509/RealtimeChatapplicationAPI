@@ -17,14 +17,14 @@ namespace WebApplication1.Repository
         {
             IEnumerable<Logs> loggs;
 
-            if (customStartTime != null && customEndTime != null)
+            if (customStartTime.HasValue && customEndTime.HasValue)
             {
                 loggs = _context.Logs
                  .Where(log => log.TimeStamp >= customStartTime && log.TimeStamp <= customEndTime);
             }
             else
             {
-                 loggs = await _context.Logs.ToListAsync();
+                loggs =  _context.Logs;
             }
 
             return loggs

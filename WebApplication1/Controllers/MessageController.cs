@@ -21,14 +21,14 @@ namespace WebApplication1.Controllers
         //GET: api/Message
         [HttpGet("{id}")]
 
-        public async Task<IActionResult> GetMessage(string id , int count)
+        public async Task<IActionResult> GetMessage(string id , int count, DateTime before)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(new { message = "invalid request parameter." });
             }
 
-            var messages = await _messageService.GetMessages(id, count);
+            var messages = await _messageService.GetMessages(id, count, before);
 
             if (messages == null)
             {

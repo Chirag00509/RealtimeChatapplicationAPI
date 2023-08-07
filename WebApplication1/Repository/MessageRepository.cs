@@ -38,11 +38,14 @@ namespace WebApplication1.Repository
 
         }
 
-        public async Task<List<Message>> GetMessages(string currentUserId, string receiverId, int count)
+        public async Task<List<Message>> GetMessages(string currentUserId, string receiverId, int count, DateTime before)
         {
             var messages = await _context.Message
                .Where(u => (u.SenderId == currentUserId && u.ReceiverId == receiverId) ||
-                           (u.SenderId == receiverId && u.ReceiverId == currentUserId))
+                           (u.SenderId == receiverId && u.ReceiverId == currentUserId)
+                &&
+               (u.Timestemp <= before))
+               .OrderBy(u => u.Timestemp)
                .Take(count)
                .ToListAsync();
 

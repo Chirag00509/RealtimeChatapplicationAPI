@@ -6,7 +6,7 @@ namespace WebApplication1.Interfaces
     {
         Task<Message> AddMessage(Message message);
 
-        Task<List<Message>> GetMessages(string currentUserId ,string receiverId, int count);
+        Task<List<Message>> GetMessages(string currentUserId ,string receiverId, int count, DateTime before);
         Task<Message> GetMessageById(int id);
         Task UpdateMessage(Message message);
         Task DeleteMessage(Message message);
