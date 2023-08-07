@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+﻿using StackExchange.Redis;
 using WebApplication1.Interfaces;
 
 namespace WebApplication1.Services
@@ -6,27 +6,40 @@ namespace WebApplication1.Services
     public class UserConnectionService : IUserConnectionService
     {
 
-        private static ConcurrentDictionary<string, string> _userConnections = new ConcurrentDictionary<string, string>();
+        //private static ConcurrentDictionary<string, string> _userConnections = new ConcurrentDictionary<string, string>();
 
-        public Task AddConnectionAsync(string userId, string connectionId)
+        private readonly IDatabase _redisDb;
+
+        public UserConnectionService(ConnectionMultiplexer multiplexer)
         {
-             _userConnections.AddOrUpdate(userId, connectionId, (_, existingConnectionId) => connectionId);
-
-            return Task.CompletedTask;
+            _redisDb = multiplexer.GetDatabase();
         }
 
-        public void RemoveConnectionAsync(string userId, string connectionId)
+        public async Task AddConnectionAsync(string userId, string connectionId)
         {
-            _userConnections.TryRemove(userId, out _);
+            // _userConnections.AddOrUpdate(userId, connectionId, (_, existingConnectionId) => connectionId);
+
+            //return Task.CompletedTask;
+
+            await _redisDb.StringSetAsync(userId, connectionId);
         }
 
-        public string GetConnectionIdAsync(string userId)
+        public async void RemoveConnectionAsync(string userId, string connectionId)
         {
-            if (_userConnections.TryGetValue(userId, out var connectionId))
-            {
-                return connectionId;
-            }
-            return null;
+            //_userConnections.TryRemove(userId, out _);
+
+            await _redisDb.KeyDeleteAsync(userId);
+        }
+
+        public async Task<string> GetConnectionIdAsync(string userId)
+        {
+            //if (_userConnections.TryGetValue(userId, out var connectionId))
+            //{
+            //    return connectionId;
+            //}
+            //return null;
+
+            return await _redisDb.StringGetAsync(userId);
         }
     }
 }
