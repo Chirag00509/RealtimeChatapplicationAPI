@@ -56,15 +56,31 @@ namespace WebApplication1.Hubs
             return Clients.Client(ConnectionId).SendAsync("ReceiveOne", message);
         }
 
-        //public Task SendEditedMessage(Message message) 
-        //{
-        //    return Clients.All.SendAsync("ReceiveEdited", message);
-        //}
+        public Task SendEditedMessage(Message message)
+        {
+            var userId = getUserId();
+            var ConnectionId = _userConnectionService.GetConnectionIdAsync(userId);
 
-        //public Task SendDeletedMessage(Message message) 
-        //{
-        //    return Clients.All.SendAsync("ReceiveDeleted", message);
-        //}
+            if (ConnectionId == null)
+            {
+                return null;
+            }
+
+            return Clients.Client(ConnectionId).SendAsync("ReceiveEdited", message);
+        }
+
+        public Task SendDeletedMessage(Message message)
+        {
+            var userId = getUserId();
+            var ConnectionId = _userConnectionService.GetConnectionIdAsync(userId);
+
+            if (ConnectionId == null)
+            {
+                return null;
+            }
+
+            return Clients.Client(ConnectionId).SendAsync("ReceiveDeleted", message);
+        }
 
         public string getUserId()
         {

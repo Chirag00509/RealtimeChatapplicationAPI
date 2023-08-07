@@ -12,8 +12,6 @@ namespace WebApplication1.Services
         {
              _userConnections.AddOrUpdate(userId, connectionId, (_, existingConnectionId) => connectionId);
 
-            Console.WriteLine("working");
-
             return Task.CompletedTask;
         }
 

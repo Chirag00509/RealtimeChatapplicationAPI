@@ -40,7 +40,18 @@ namespace WebApplication1.Services
 
             await _messageRepository.DeleteMessage(messages);
 
-            await _hubContext.Clients.All.SendAsync("ReceiveDeleted", messages);
+            var senderConnectionId = _userConnectionService.GetConnectionIdAsync(userId);
+            var receiverConnectionId = _userConnectionService.GetConnectionIdAsync(messages.ReceiverId);
+
+            if (senderConnectionId != null)
+            {
+                await _hubContext.Clients.Client(senderConnectionId).SendAsync("ReceiveDeleted", messages);
+            }
+
+            if (receiverConnectionId != null)
+            {
+                await _hubContext.Clients.Client(receiverConnectionId).SendAsync("ReceiveDeleted", messages);
+            }
 
             return new OkObjectResult(new { message = "Message deleted successfully" });
         }
@@ -98,8 +109,6 @@ namespace WebApplication1.Services
                 await _hubContext.Clients.Client(receiverConnectionId).SendAsync("ReceiveOne", message);
             }
 
-            await _hubContext.Clients.Client(receiverConnectionId).SendAsync("ReceiveOne", message);
-
             var messageResponse = new MessageResponse
             {
                 MessageId = addMessage.Id,
@@ -131,8 +140,18 @@ namespace WebApplication1.Services
             messages.content = message.content;
             await _messageRepository.UpdateMessage(messages);
 
-            await _hubContext.Clients.All.SendAsync("ReceiveEdited", messages);
+            var senderConnectionId = _userConnectionService.GetConnectionIdAsync(userId);
+            var receiverConnectionId = _userConnectionService.GetConnectionIdAsync(messages.ReceiverId);
 
+            if (senderConnectionId != null)
+            {
+                await _hubContext.Clients.Client(senderConnectionId).SendAsync("ReceiveEdited", messages);
+            }
+
+            if (receiverConnectionId != null)
+            {
+                await _hubContext.Clients.Client(receiverConnectionId).SendAsync("ReceiveEdited", messages);
+            }
 
             return new OkObjectResult(new { message = "Message edited successfully" });
         }
