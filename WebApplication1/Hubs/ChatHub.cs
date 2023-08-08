@@ -36,15 +36,15 @@ namespace WebApplication1.Hubs
             await base.OnConnectedAsync();
         }
 
-        public override async Task OnDisconnectedAsync(Exception exception)
-        {
-            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var connectionId = Context.ConnectionId;
+        //public override async Task OnDisconnectedAsync(Exception exception)
+        //{
+        //    var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //    var connectionId = Context.ConnectionId;
 
-             _userConnectionService.RemoveConnectionAsync(userId, connectionId);
+        //     _userConnectionService.RemoveConnectionAsync(userId, connectionId);
 
-            await base.OnDisconnectedAsync(exception);
-        }
+        //    await base.OnDisconnectedAsync(exception);
+        //}
         public async Task SendMessage(Message message)
         {
             var userId = getUserId();

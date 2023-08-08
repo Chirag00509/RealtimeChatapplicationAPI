@@ -24,11 +24,6 @@ namespace WebApplication1.Services
             await _redisDb.StringSetAsync(userId, connectionId);
         }
 
-        public async void RemoveConnectionAsync(string userId, string connectionId)
-        {
-            //_userConnections.TryRemove(userId, out _);
-
-            await _redisDb.KeyDeleteAsync(userId);
         }
 
         public async Task<string> GetConnectionIdAsync(string userId)
