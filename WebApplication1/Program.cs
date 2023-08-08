@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
 using System.Text;
 using WebApplication1.Data;
 using WebApplication1.Hubs;
@@ -16,8 +17,21 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
-
 builder.Services.AddSignalR();
+
+
+builder.Services.AddSignalR().AddStackExchangeRedis();
+builder.Services.AddSignalR()
+  .AddStackExchangeRedis("localhost:6379", options =>
+  {
+      options.Configuration.ChannelPrefix = "MyApp.ChatHub";
+  });
+
+builder.Services.AddSingleton(sp =>
+{
+    var redisConnection = ConnectionMultiplexer.Connect("localhost:6379");
+    return redisConnection;
+});
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -50,7 +64,6 @@ builder =>
     .AllowCredentials();
 }));
 
-
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddAuthentication(options =>
@@ -78,7 +91,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

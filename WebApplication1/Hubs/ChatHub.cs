@@ -8,7 +8,7 @@ using WebApplication1.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IdentityModel.Tokens.Jwt;
-
+using StackExchange.Redis;
 
 namespace WebApplication1.Hubs
 {
@@ -16,12 +16,14 @@ namespace WebApplication1.Hubs
     {
         private readonly IUserConnectionService _userConnectionService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ConnectionMultiplexer _redisConnection;
 
 
-        public ChatHub(IUserConnectionService userConnectionService, IHttpContextAccessor httpContextAccessor)
+        public ChatHub(IUserConnectionService userConnectionService, IHttpContextAccessor httpContextAccessor, ConnectionMultiplexer multiplexer)
         {
             _userConnectionService = userConnectionService;
             _httpContextAccessor = httpContextAccessor;
+            _redisConnection = multiplexer;
         }
         public override async Task OnConnectedAsync()
         {
@@ -29,57 +31,53 @@ namespace WebApplication1.Hubs
 
             var userId = getUserId();
 
-           _userConnectionService.AddConnectionAsync(userId, connectionId);
+           await _userConnectionService.AddConnectionAsync(userId, connectionId);
 
             await base.OnConnectedAsync();
         }
 
-        public override async Task OnDisconnectedAsync(Exception exception)
-        {
-            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var connectionId = Context.ConnectionId;
+        //public override async Task OnDisconnectedAsync(Exception exception)
+        //{
+        //    var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //    var connectionId = Context.ConnectionId;
 
-             _userConnectionService.RemoveConnectionAsync(userId, connectionId);
+        //    _userConnectionService.RemoveConnectionAsync(userId, connectionId);
 
-            await base.OnDisconnectedAsync(exception);
-        }
-        public Task SendMessage(Message message)
-        {
-            var userId = getUserId();
-            var ConnectionId = _userConnectionService.GetConnectionIdAsync(userId);
+        //    await base.OnDisconnectedAsync(exception);
+        //}
 
-            if(ConnectionId == null) 
-            {
-                return null;
-            }
-
-            return Clients.Client(ConnectionId).SendAsync("ReceiveOne", message);
-        }
-
-        public Task SendEditedMessage(Message message)
+        public async Task SendMessage(Message message)
         {
             var userId = getUserId();
-            var ConnectionId = _userConnectionService.GetConnectionIdAsync(userId);
+            var ConnectionId = await _userConnectionService.GetConnectionIdAsync(userId);
 
-            if (ConnectionId == null)
+            if(ConnectionId != null) 
             {
-                return null;
+                await Clients.Client(ConnectionId).SendAsync("ReceiveOne", message);
             }
-
-            return Clients.Client(ConnectionId).SendAsync("ReceiveEdited", message);
         }
 
-        public Task SendDeletedMessage(Message message)
+        public async Task SendEditedMessage(Message message)
         {
             var userId = getUserId();
-            var ConnectionId = _userConnectionService.GetConnectionIdAsync(userId);
+            var ConnectionId = await _userConnectionService.GetConnectionIdAsync(userId);
 
-            if (ConnectionId == null)
+            if (ConnectionId != null)
             {
-                return null;
+                await Clients.Client(ConnectionId).SendAsync("ReceiveEdited", message);
             }
 
-            return Clients.Client(ConnectionId).SendAsync("ReceiveDeleted", message);
+        }
+
+        public async Task SendDeletedMessage(Message message)
+        {
+            var userId = getUserId();
+            var ConnectionId = await _userConnectionService.GetConnectionIdAsync(userId);
+
+            if (ConnectionId != null)
+            {
+                await Clients.Client(ConnectionId).SendAsync("ReceiveDeleted", message);
+            }
         }
 
         public string getUserId()
