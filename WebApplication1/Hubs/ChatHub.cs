@@ -41,10 +41,11 @@ namespace WebApplication1.Hubs
         //    var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         //    var connectionId = Context.ConnectionId;
 
-        //     _userConnectionService.RemoveConnectionAsync(userId, connectionId);
+        //    _userConnectionService.RemoveConnectionAsync(userId, connectionId);
 
         //    await base.OnDisconnectedAsync(exception);
         //}
+
         public async Task SendMessage(Message message)
         {
             var userId = getUserId();
@@ -54,7 +55,6 @@ namespace WebApplication1.Hubs
             {
                 await Clients.Client(ConnectionId).SendAsync("ReceiveOne", message);
             }
-
         }
 
         public async Task SendEditedMessage(Message message)
@@ -91,11 +91,6 @@ namespace WebApplication1.Hubs
             var id = userIdClaim.Value;
 
             return id;
-        }
-
-        public bool IsRedisConnected()
-        {
-            return _redisConnection != null && _redisConnection.IsConnected;
         }
 
     }
