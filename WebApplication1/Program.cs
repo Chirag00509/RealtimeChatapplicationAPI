@@ -17,14 +17,21 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddSignalR();
 
-builder.Services.AddSignalR().AddStackExchangeRedis("redis://localhost:6379/0");
 
-//builder.Services.AddSingleton(sp =>
-//{
-//    var redisConnection = ConnectionMultiplexer.Connect("redis://localhost:6379/0");
-//    return redisConnection;
-//});
+builder.Services.AddSignalR().AddStackExchangeRedis();
+builder.Services.AddSignalR()
+  .AddStackExchangeRedis("redis://localhost:6379/0", options =>
+  {
+      options.Configuration.ChannelPrefix = "MyApp.ChatHub";
+  });
+
+builder.Services.AddSingleton(sp =>
+{
+    var redisConnection = ConnectionMultiplexer.Connect("redis://localhost:6379/0");
+    return redisConnection;
+});
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();

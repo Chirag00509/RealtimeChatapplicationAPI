@@ -10,10 +10,10 @@ namespace WebApplication1.Services
 
         private readonly IDatabase _redisDb;
 
-        public UserConnectionService(ConnectionMultiplexer multiplexer)
-        {
-            _redisDb = multiplexer.GetDatabase();
-        }
+        //public UserConnectionService(ConnectionMultiplexer multiplexer)
+        //{
+        //    _redisDb = multiplexer.GetDatabase();
+        //}
 
         public async Task AddConnectionAsync(string userId, string connectionId)
         {
