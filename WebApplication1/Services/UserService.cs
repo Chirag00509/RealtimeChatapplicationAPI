@@ -148,10 +148,6 @@ namespace WebApplication1.Services
                             {
                                 await _userManager.AddLoginAsync(user, userLoginInfo);
                             }
-                            else
-                            {
-
-                            }
                         }
                     }
 
