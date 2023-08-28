@@ -39,20 +39,6 @@ namespace WebApplication1.Services
             }
 
             await _messageRepository.DeleteMessage(messages);
-
-            var senderConnectionId = await _userConnectionService.GetConnectionIdAsync(userId);
-            var receiverConnectionId = await _userConnectionService.GetConnectionIdAsync(messages.ReceiverId);
-
-            if (senderConnectionId != null)
-            {
-                await _hubContext.Clients.Client(senderConnectionId).SendAsync("ReceiveDeleted", messages);
-            }
-
-            if (receiverConnectionId != null)
-            {
-                await _hubContext.Clients.Client(receiverConnectionId).SendAsync("ReceiveDeleted", messages);
-            }
-
             return new OkObjectResult(new { message = "Message deleted successfully" });
         }
 
@@ -95,20 +81,6 @@ namespace WebApplication1.Services
 
             var addMessage = await _messageRepository.AddMessage(message);
 
-
-            var senderConnectionId = await _userConnectionService.GetConnectionIdAsync(userId);
-            var receiverConnectionId = await _userConnectionService.GetConnectionIdAsync(message.ReceiverId);
-
-            if (senderConnectionId != null)
-            {
-                await _hubContext.Clients.Client(senderConnectionId).SendAsync("ReceiveOne", message);
-            }
-
-            if (receiverConnectionId != null)
-            {
-                await _hubContext.Clients.Client(receiverConnectionId).SendAsync("ReceiveOne", message);
-            }
-
             var messageResponse = new MessageResponse
             {
                 MessageId = addMessage.Id,
@@ -139,19 +111,6 @@ namespace WebApplication1.Services
 
             messages.content = message.content;
             await _messageRepository.UpdateMessage(messages);
-
-            var senderConnectionId = await _userConnectionService.GetConnectionIdAsync(userId);
-            var receiverConnectionId = await _userConnectionService.GetConnectionIdAsync(messages.ReceiverId);
-
-            if (senderConnectionId != null)
-            {
-                await _hubContext.Clients.Client(senderConnectionId).SendAsync("ReceiveEdited", messages);
-            }
-
-            if (receiverConnectionId != null)
-            {
-                await _hubContext.Clients.Client(receiverConnectionId).SendAsync("ReceiveEdited", messages);
-            }
 
             return new OkObjectResult(new { message = "Message edited successfully" });
         }
