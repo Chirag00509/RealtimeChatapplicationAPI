@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using StackExchange.Redis;
+using WebApplication1.Modal;
 
 namespace WebApplication1.Hubs
 {
@@ -31,7 +32,7 @@ namespace WebApplication1.Hubs
 
             var userId = getUserId();
 
-           await _userConnectionService.AddConnectionAsync(userId, connectionId);
+            await _userConnectionService.AddConnectionAsync(userId, connectionId);
 
             await base.OnConnectedAsync();
         }
@@ -46,21 +47,21 @@ namespace WebApplication1.Hubs
         //    await base.OnDisconnectedAsync(exception);
         //}
 
-        public async Task SendMessage(Message message)
+        public async Task SendMessage(MessageDto message)
         {
-            var userId = getUserId();
-            var ConnectionId = await _userConnectionService.GetConnectionIdAsync(userId);
+            string userId = getUserId();
+
+            var ConnectionId = await _userConnectionService.GetConnectionIdAsync(Convert.ToString(message.ReceiverId));
 
             if(ConnectionId != null) 
             {
-                await Clients.Client(ConnectionId).SendAsync("ReceiveOne", message);
+                await Clients.Client(ConnectionId).SendAsync("ReceiveOne", message, userId);
             }
         }
 
-        public async Task SendEditedMessage(Message message)
+        public async Task SendEditedMessage(MessageDto message)
         {
-            var userId = getUserId();
-            var ConnectionId = await _userConnectionService.GetConnectionIdAsync(userId);
+            var ConnectionId = await _userConnectionService.GetConnectionIdAsync(Convert.ToString(message.ReceiverId));
 
             if (ConnectionId != null)
             {
@@ -69,14 +70,15 @@ namespace WebApplication1.Hubs
 
         }
 
-        public async Task SendDeletedMessage(Message message)
+        public async Task SendDeletedMessage(MessageDto message)
         {
-            var userId = getUserId();
+            string userId = Context.UserIdentifier;
+
             var ConnectionId = await _userConnectionService.GetConnectionIdAsync(userId);
 
             if (ConnectionId != null)
             {
-                await Clients.Client(ConnectionId).SendAsync("ReceiveDeleted", message);
+                await Clients.Client(ConnectionId).SendAsync("ReceiveDeleted", message.ReceiverId);
             }
         }
 
